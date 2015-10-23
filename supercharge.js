@@ -94,13 +94,13 @@ function weightedAverage(w, p, q) {
 function neg(p) {
 	return times(-1, p);
 }
-function polarize(p) {
+function makePolar(p) {
 	var r = Math.sqrt(p[0] * p[0] + p[1] * p[1]);//; alert(r)
 	var t = Math.atan2(p[1], p[0]);//; alert(t)
 	return [r, t * 360 / Math.TAU];
 }
 function rotate_p_theta(p, t) {
-	var pol = polarize(p);
+	var pol = makePolar(p);
 	return polar(pol[0], pol[1] + t);
 }
 function perp(p, q) {
