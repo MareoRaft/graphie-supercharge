@@ -1,0 +1,11 @@
+Graphie-Supercharge integration ideas:
+
+We will begin by building our very own Graphie User Guide so as not to disturb the real one.  This guide, once fully integrated with the existing information, would then be copied over to the real guide...
+
+For the most part, we can follow the underscorejs.org, where it is an alphabetical list of functions.
+
+That is, each function will be shown as an example of using that function.  Perhaps for my library, a minimal example where defaults are used, and then a large example where all the keywords are used.  Immediately after each example can be a link to that function used with the supercharge template so they can see it in action (and get the necessary window range parameters, etc)  Functions that require supercharge.js will have "supercharge.js" in bright yellow next to them, or faded, not in the way but the info is there.
+
+This is a google doc, so we will have an alphabetical index ontop that links to each function.  There will ALSO be a subject-based index especially for new users.  There will be a Getting Started section for newbies.
+
+We could have a blank supercharge.js template added to the Graphie templates, so that users can begin with the most recent version of the library already set up (if possible).  Otherwise, we can  have a link to supercharge template on the Graphie User Guide, which would allow me to keep the most up-to-date version, but would be a hassle for users, who probably wouldn't adopt it.

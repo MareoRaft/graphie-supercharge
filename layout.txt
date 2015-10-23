@@ -1,0 +1,80 @@
+list of supercharge functions to document, in order
+---------------------------------------------------
+
+(not a function) how to access graphie url
+
+(not func) how to load supercharge template
+
+(not func) how to setup the header and what is controls
+(this may include the "for free" variables xCenter, yCenter, xRange, yRange
+
+utilities
+-----------
+
+def()
+
+die()
+
+commafy()
+
+math things
+-------------
+
+Math.PHI
+Math.TAU
+
+mod()
+
+neg(), times(),
+add(), minus(),
+average(), weightedAverage(),
+
+polarize()
+
+normalize()
+
+theta rotations?
+
+perpPlope()
+
+intersection()
+
+
+visual things
+------------------
+
+style()
+styleReset()
+
+
+
+draw functions
+-----------------
+
+curlyBraceSuper() --- not done yet
+drawBracket() --- not done yet
+
+
+drawLabel()
+drawPoints() // mention points and point
+drawArrow()
+
+
+drawPolyline()
+drawPolygon2()
+drawTriangle() // mention solveTriangle()
+drawSquare() // mention solveSquare()
+drawRectangle() // mention solveRectangle() 
+
+
+drawTable() 
+
+
+drawGrid()
+drawHistogram()  ----> GOOD ENOUGH
+drawBarGraph() --> DONE
+drawDotPlot() -- DONE
+drawPieGraph() -- DONE
+
+drawHorizontalLegend() -- DONE
+drawLegend() -- DONE
