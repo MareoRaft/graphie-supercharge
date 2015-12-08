@@ -394,7 +394,7 @@ function solveTriangle(tri) { // takes in a polygon (must be a triangle)
 function drawTriangle(tri) {
 	return drawPolygon2(solveTriangle(tri));
 }
-function drawRectangle(poly) {
+function solveRectangle(poly) {
 	if (def(poly.center)) poly.bottomLeft = [poly.center[0] - poly.WD / 2, poly.center[1] - poly.HT / 2];
 	else if (def(poly.topLeft)) poly.bottomLeft = [poly.topLeft[0], poly.topLeft[1] - poly.HT];
 	// alert(poly.bottomLeft)
@@ -405,17 +405,22 @@ function drawRectangle(poly) {
 		add(poly.bottomLeft, [0, poly.HT]),
 		add(poly.bottomLeft, [0, 0]),
 	];
+	return poly;
+}
+function drawRectangle(poly) {
+	solveRectangle(poly);
 	style(poly);
 		path(poly.points); // previously drawPolygon(poly) // NOT drawPolygon2, because then the right angles appear.
 	styleReset();
 	if(def(poly.label)){
-		solveRectangle(poly);
+		drawRectangleHelper(poly);
 		drawLabel([poly.label, {point: poly.center}]);
 	}
 }
-function solveRectangle(poly){
+function drawRectangleHelper(poly){
 	poly.center = [ poly.bottomLeft[0] + poly.WD / 2, poly.bottomLeft[1] + poly.HT / 2 ];
 	poly.topLeft = [ poly.bottomLeft[0], poly.bottomLeft[1] + poly.HT ];
+	return poly;
 }
 function drawPoints(obj) {
 	_.each(obj.points, function(point) {
