@@ -29,7 +29,6 @@ function setup() {
 	yCenter = (range[1][0] + range[1][1]) / 2;
 	xRange = range[0][1] - range[0][0];
 	yRange = range[1][1] - range[1][0];
-	// styleNormal['clipRect'] = [[range[0][0], range[1][0]], [xRange, yRange]]; // this doesn't work because i don't truly understand how clipRect works
 }
 /////////////////////////////////////////////////////////////
 Math.PHI = 1.61803398874989484820458683;
@@ -574,6 +573,11 @@ function insertCommas(num, isTeX) {
 }
 function initGridAttributes(g) {
 	_.defaults(g, {
+		//shared defaults
+		tickScale: 1,
+		labelsFormat: undefined,
+	});
+	_.defaults(g, {
 		//defaults for x
 		xMin: 0, xMax: +10, xStep: 1,
 		xPositionOfyAxis: (g.xMin > 0) ? g.xMin : (g.xMax < 0) ? g.xMax : 0,
@@ -582,7 +586,7 @@ function initGridAttributes(g) {
 		//x labels
 		xLabel: ' ', xLabelBufferScale: 1, xArrowLabel: '', xArrowLabelPosition: 'right',
 		xLabels: true, xLabelsSize: '\\small', xLabelsAlternate: false, xLabelsRotation: 0,
-		xLabelsPrefix: '', xLabelsSuffix: '',
+		xLabelsPrefix: '', xLabelsSuffix: '', xLabelsFormat: g.labelsFormat,
 		//defaults for y
 		yMin: 0, yMax: +10, yStep: 1,
 		yPositionOfxAxis: (g.yMin > 0) ? g.yMin : (g.yMax < 0) ? g.yMax : 0,
@@ -591,9 +595,7 @@ function initGridAttributes(g) {
 		//y labels
 		yLabel: ' ', yLabelBufferScale: 1, yArrowLabel: '', yArrowLabelPosition: 'above',
 		yLabels: true, yLabelsSize: '\\small', yLabelsAlternate: false, yLabelsRotation: 0,
-		yLabelsPrefix: '', yLabelsSuffix: '',
-		//shared defaults
-		tickScale: 1,
+		yLabelsPrefix: '', yLabelsSuffix: '', yLabelsFormat: g.labelsFormat,
 	});
 	//x finishing stuff...
 	if(g.xLabelsPrefix!==''){ g.xLabelsPrefix = textify(g.xLabelsPrefix); }
@@ -638,7 +640,7 @@ function drawySide(g) {
 
 	//y stuff
 	for (var y = g.yMin; y <= g.yMax; y += g.yStep) {
-		var labelstring = g.yLabelsSize + g.yLabelsPrefix + insertCommas(roundScalar(y)) + g.yLabelsSuffix;
+		var labelstring = def(g.yLabelsFormat)? g.yLabelsFormat(y): g.yLabelsSize + g.yLabelsPrefix + insertCommas(roundScalar(y)) + g.yLabelsSuffix;
 		if (g.yLabels && (g.yLabelsDrawAll || Math.abs(y - g.yPos) > g.yBuffer / 2)) {
 			if (g.yLabelsRotation) {
 				var yLabelsRotation = -g.yLabelsRotation;
@@ -659,9 +661,9 @@ function drawySide(g) {
 	}
 }
 function plotxFunction(g, func){
-	// style({clipRect: [[g.xMin, g.yMin], [g.xRange, g.yRange]]}); // disabled temporarily because i don't know how to reset the clipRect back to normal afterwards!
+	style({clipRect: [[g.xMin, g.yMin], [g.xRange, g.yRange]]});
 		plot(func, [g.xMin, g.xMax], { 'plot-points': 8000 });
-	// styleReset();
+	style({clipRect: [[range[0][0], range[1][0]], [xRange, yRange]]});
 }
 function drawxSide(g) {
 	initGridAttributes(g);
@@ -688,7 +690,7 @@ function drawxSide(g) {
 
 	//x stuff
 	for (var x = g.xMin; x <= g.xMax; x += g.xStep) {
-		var labelstring = g.xLabelsSize + g.xLabelsPrefix + insertCommas(roundScalar(x)) + g.xLabelsSuffix;
+		var labelstring = def(g.xLabelsFormat)? g.xLabelsFormat(x): g.xLabelsSize + g.xLabelsPrefix + insertCommas(roundScalar(x)) + g.xLabelsSuffix;
 		if (x < 0) labelstring += '\\hphantom{-}';
 		if (g.xLabels
 				&& (g.xLabelsDrawAll || Math.abs(x - g.xPos) > g.xBuffer / 2)
@@ -1078,13 +1080,245 @@ function drawLegend(h,l){
 	});
 
 }
+function rotate(points,center,angle) {
+    var image=[];
+    var rad=angle*Math.PI/180;
+    for (var i=0;i<points.length;i++) {
+        image[i]=[];
+        image[i][0]=center[0]+Math.sqrt(pow(points[i][0]-center[0],2)+pow(points[i][1]-center[1],2))*Math.sin(Math.atan2(points[i][0]-center[0],points[i][1]-center[1])-rad);
+        image[i][1]=center[1]+Math.sqrt(pow(points[i][0]-center[0],2)+pow(points[i][1]-center[1],2))*Math.cos(Math.atan2(points[i][0]-center[0],points[i][1]-center[1])-rad);
+    }
+    return image;
+}
+function dilate(points,center,scale) {
+    var image=[];
+    for (var i=0;i<points.length;i++) {
+        image[i]=[];
+        image[i][0]=center[0]+(points[i][0]-center[0])*scale;
+        image[i][1]=center[1]+(points[i][1]-center[1])*scale;
+    }
+    return image;
+}
+function stretchX(points, scale) {
+    var image=[];
+    for (var i=0;i<points.length;i++) {
+        image[i]=[];
+        image[i][1]=points[i][1];
+        image[i][0]=points[i][0]*scale;
+    }
+    return image;
+}
+function stretchY(points, scale) {
+    var image=[];
+    for (var i=0;i<points.length;i++) {
+        image[i]=[];
+        image[i][0]=points[i][0];
+        image[i][1]=points[i][1]*scale;
+    }
+    return image;
+}
+function translate(points, x, y) {
+    var image=[];
+    for (var i=0;i<points.length;i++) {
+        image[i]=[];
+        image[i][0]=points[i][0]+x;
+        image[i][1]=points[i][1]+y;
+    }
+    return image;
+}
+function reflectX(points, x) {
+    var image=[];
+    for (var i=0;i<points.length;i++) {
+        image[i]=[];
+        image[i][0]=2*x-points[i][0];
+        image[i][1]=points[i][1];
+    }
+    return image;
+}
+
+function reflectY(points, y) {
+    var image=[];
+    for (var i=0;i<points.length;i++) {
+        image[i]=[];
+        image[i][1]=2*y-points[i][1];
+        image[i][0]=points[i][0];
+    }
+    return image;
+}
+
+function reflect(points, refPoints) {
+    var image=[];
+    var distance = 0;
+    var angle = 0;
+    var m = (refPoints[0][1]-refPoints[1][1])/(refPoints[0][0]-refPoints[1][0]);
+        mPerp = -1/m;
+        b = refPoints[0][1] - m*refPoints[0][0];
+
+    if(refPoints[0][0] === refPoints[1][0])
+        { image = reflectX(points,refPoints[0][0]);  }
+    else if(refPoints[0][1] === refPoints[1][1])
+        { image = reflectY(points,refPoints[0][1]);  }
+    else {
+        for (var i=0;i<points.length;i++) {
+            distance = (m*points[i][0]-points[i][1]+b)/sqrt((m*m)+1);
+            if(mPerp >= 0){angle = (180/PI)*atan(mPerp);}
+            else{angle = 180 + (180/PI)*atan(mPerp);}
+
+            image[i]=[];
+            image[i] = addPoints(points[i],polar(2*distance,angle));
+        }
+    }
+    return image;
+}
+function orPoints(points) {
+    for (var i=0;i<points.length;i++) {
+        drawPoint({
+            point:points[i],
+            color: ORANGE
+        });
+    }
+}
+function dilTool(center,scale) {
+    drawPoint({
+        point:center,
+        color:ORANGE
+    });
+    drawCircle({
+        center:center,
+        radius:scale*2,
+        stroke:ORANGE,
+        dashed:true
+    });
+}
+function refTool(center, angle) {
+
+    var rad=Math.PI*angle/180;
+    var slope=tan(rad);
+    var a=[center[0]+1,center[1]+slope];
+
+    drawLine({
+        points:[center,a],
+        stroke:ORANGE,
+        dashed:true
+    });
+
+    drawArc({
+        center: center,
+        radius: 1.95,
+        start: 70+angle,
+        end: 110+angle,
+        stroke: ORANGE,
+        strokeWidth:4
+    });
+
+    var arrow1=[
+            [center[0]+0.95,center[1]+1.75],
+            [center[0]+0.6,center[1]+2.1],
+            [center[0]+0.5,center[1]+1.63],
+        ];
+
+    var arrow2=reflectX(arrow1,center[0]);
+
+    arrow1=rotate(arrow1,center,angle);
+    arrow2=rotate(arrow2,center,angle);
+
+    drawPolygon({
+        points:arrow1,
+        color:ORANGE,
+        fillOpacity:1,
+        angleLabels:[]
+    });
+
+    drawPolygon({
+        points:arrow2,
+        color:ORANGE,
+        fillOpacity:1,
+        angleLabels:[]
+    });
+
+    arrow1=[
+        [center[0],center[1]+0.25],
+        [center[0]+0.5,center[1]+0.75],
+        [center[0]-0.5,center[1]+0.75]
+    ];
+
+    arrow2=reflectY(arrow1,center[1]);
+
+    arrow1=rotate(arrow1,center,angle);
+    arrow2=rotate(arrow2,center,angle);
+
+    drawPolygon({
+        points:arrow1,
+        color:ORANGE,
+        fillOpacity:0,
+        angleLabels:[]
+    });
+    drawPolygon({
+        points:arrow2,
+        color:ORANGE,
+        fillOpacity:1,
+        angleLabels:[]
+    });
+}
+function rotTool(center,angle) {
+    drawPoint({
+        point:center,
+        color:ORANGE
+    });
+
+    drawArc({
+        center: center,
+        radius: 1.5,
+        start: -45+angle,
+        end: 45+angle,
+        stroke: ORANGE,
+        strokeWidth:4
+    });
+
+    var arrow1=[
+            [center[0]+0.7,center[1]-1],
+            [center[0]+1.3,center[1]-1],
+            [center[0]+1,center[1]-1.5],
+        ];
+
+    var arrow2=reflectX(arrow1,center[0]);
+
+    arrow1=rotate(arrow1,center,angle+90);
+    arrow2=rotate(arrow2,center,angle+90);
+
+    drawPolygon({
+        points:arrow1,
+        color:ORANGE,
+        fillOpacity:1,
+        angleLabels:[]
+    });
+
+    drawPolygon({
+        points:arrow2,
+        color:ORANGE,
+        fillOpacity:1,
+        angleLabels:[]
+    });
+}
+function drawImage(i) {
+	_.defaults(i, {
+		point: [0, 0],
+		name: "acorn",
+		scale: 1,
+		rotation: 0,
+	});
+	var drawnimage = image(i.name, i.point, i.scale)
+	drawnimage.rotate(i.rotation, scalePoint(i.point)[0], scalePoint(i.point)[1]);
+}
+
+
 
 ///////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////
 /* The X and Y ranges of this canvas */
-var range = [[-9.7, 10.5], [-9.5, 10.5]];
+var range = [[-9.7, 10.5], [-9.4, 10.8]];
 /* This variable stretches the x-axis by the factor you put */
 var stretch = 'square';
 /* The output's largest side is limited to this many pixels */
@@ -1092,7 +1326,7 @@ var size = 420;
 
 setup();
 
-itemType = 'SPR';
+itemType = 'MC'; /* 'MC' or 'SPR' */
 ///////////////////////////////////////////////////////////
 
 
