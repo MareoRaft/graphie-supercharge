@@ -129,6 +129,7 @@ function drawPolygon2(poly) {
 	delete poly.angleLabels;
 	delete poly.arcs; // but right angles refuse to go away
 	drawPolygon(poly);
+	return poly;
 }
 function solveSquare(sq) {
 	var center = sq.center;
@@ -143,7 +144,7 @@ function solveSquare(sq) {
 }
 function drawSquare(sq) {
 	solveSquare(sq);
-	drawPolygon2(sq);
+	return drawPolygon2(sq);
 }
 function point_at_x_equals(a, b, x) {
 	return [x, a[1] + (x - a[0]) / (b[0] - a[0]) * (b[1] - a[1])];
@@ -298,6 +299,7 @@ function drawPieGraph(pie) {
 		}
 		deg += pie.increments[i];
 	}
+	return pie;
 }
 function degreesToRadians(array) {
 	for (var i = 0; i < array.length; ++i) if (def(array[i])) array[i] *= Math.TAU / 360;
@@ -415,6 +417,7 @@ function drawRectangle(poly) {
 		drawRectangleHelper(poly);
 		drawLabel([poly.label, {point: poly.center}]);
 	}
+	return poly;
 }
 function drawRectangleHelper(poly){
 	poly.center = [ poly.bottomLeft[0] + poly.WD / 2, poly.bottomLeft[1] + poly.HT / 2 ];
@@ -718,6 +721,7 @@ function drawGrid(g) {
 	drawxSide(g);
 	//y stuff
 	drawySide(g);
+	return g;
 }
 function drawFraction(obj) {
 	_.defaults(obj, {
@@ -783,6 +787,7 @@ function drawDotPlot(d) {
 			point([datum, height]);
 		}
 	});
+	return d;
 }
 function drawHorizontalLegend(l){
 	drawRectangle(l);
@@ -897,6 +902,7 @@ function drawTable(table){
 			});
 		}
 	}
+	return table;
 }
 function drawHistogram(h) {
 	if (typeof h.data[0] === 'number') {
@@ -940,6 +946,7 @@ function drawHistogram(h) {
 	h.data.sort(function(a, b) {return a[0] - b[0]}); // sort by x! // necessary to draw in x order for colorMedian
 	if( def(h.xLineStep) ) h.xStep = h.xLineStep;
 	_drawBars(h);
+	return h;
 }
 function drawBarGraph(bar) { // 'bar' is a bar graph object
 	// use data to figure out x parameters
@@ -973,6 +980,7 @@ function drawBarGraph(bar) { // 'bar' is a bar graph object
 		else label([x + 0.5, bar.yPositionOfxAxis], datum[0], 'below', bar.barLabelsTex);
 	});
 	_drawBars(bar);
+	return bar;
 }
 function _drawBars(obj){
 	if(obj.colorMedian){
@@ -1078,7 +1086,6 @@ function drawLegend(h,l){
 			}, l)
 		}
 	});
-
 }
 function rotate(points,center,angle) {
     var image=[];
